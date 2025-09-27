@@ -1,0 +1,47 @@
+/* Set black background and white text for the whole page */
+body {
+background-color: black;
+color: white;
+font-family: Arial, sans-serif;
+padding: 20px;
+}
+
+/* Each form row spacing */
+.form-row {
+margin-bottom: 15px;
+}
+
+/* Inputs and selects styling */
+input, select, button {
+background-color: #222; /* dark input background */
+color: white;
+border: 1px solid #555;
+padding: 5px 10px;
+font-size: 1rem;
+}
+
+/* Button hover effect */
+button:hover {
+background-color: #444;
+cursor: pointer;
+}
+
+/* Small text styling */
+small {
+color: #aaa;
+}
+
+div {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Result box styling */
+#resultBox {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #111;
+  border: 1px solid #555;
+  min-height: 50px;
+  white-space: pre-wrap; /* preserves line breaks */
+}
