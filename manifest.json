@@ -2,26 +2,17 @@
   "name": "fall-plan",
   "short_name": "fall-plan",
   "description": "If you plan to fall out of the sky have a plan",
-  "start_url": "...",
+  "start_url": "http://127.0.0.1:8080/",
   "theme_color": "black",
   "background_color": "black",
   "display": "standalone",
   "icons": [
     {
-      "src": "circle.ico",
-      "sizes": "48x48"
+      "src": "logo-192.png",
+      "sizes": "192x192"
     },
     {
-      "src": "icons/circle.svg",
-      "sizes": "72x72 96x96",
-      "purpose": "maskable"
-    },
-    {
-      "src": "icons/tire.svg",
-      "sizes": "128x128 256x256"
-    },
-    {
-      "src": "icons/wheel.svg",
+      "src": "logo-512.png",
       "sizes": "512x512"
     }
   ]
