@@ -2,7 +2,7 @@
   "name": "fall-plan",
   "short_name": "fall-plan",
   "description": "If you plan to fall out of the sky have a plan",
-  "start_url": "/",
+  "start_url": ".",
   "theme_color": "black",
   "background_color": "black",
   "display": "standalone",
