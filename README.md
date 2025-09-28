@@ -7,3 +7,8 @@ Will become a simple webapp to help people plan for parachuting.
 All graphics are created by steve (author)
 
 License undecided as of right now.
+
+## Installation Guide
+
+## Android
+## IOS

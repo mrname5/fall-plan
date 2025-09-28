@@ -3,7 +3,8 @@ body {
 background-color: black;
 color: white;
 font-family: Arial, sans-serif;
-padding: 20px;
+padding: 10px;
+padding-top: 5px;
 }
 
 /* Each form row spacing */
@@ -16,7 +17,7 @@ input, select, button {
 background-color: #222; /* dark input background */
 color: white;
 border: 1px solid #555;
-padding: 5px 10px;
+padding: 10px 10px;
 font-size: 1rem;
 }
 
@@ -32,7 +33,7 @@ color: #aaa;
 }
 
 div {
-    font-size: 20px;
+    font-size: 23px;
     font-weight: bold;
 }
 
