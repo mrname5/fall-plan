@@ -9,7 +9,7 @@ All graphics are created by steve (author)
 License undecided as of right now.
 
 ## Installation Guide
-Go to: 
+Go to: https://mrname5.github.io/fall-plan/
 ## Android
 Use a chromium based browser like Google Chrome.
 

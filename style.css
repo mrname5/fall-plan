@@ -46,3 +46,18 @@ div {
   min-height: 50px;
   white-space: pre-wrap; /* preserves line breaks */
 }
+
+@media (orientation: portrait) {
+    div {
+        font-size: 63px;
+    }
+    /* Inputs and selects styling */
+    input, select, button {
+        font-size: 60px;
+        margin-bottom: 15px;
+    }
+    h1 {
+        font-size: 68px;
+        font-weight: bolder;
+    }
+}
