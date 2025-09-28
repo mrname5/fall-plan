@@ -19,7 +19,7 @@ enterButton.onclick = function (e) {
 if ("serviceWorker" in navigator) {
   // Register a service worker hosted at the root of the
   // site using the default scope.
-  navigator.serviceWorker.register("https://mrname5.github.io/fall-plan/sw.js").then(
+  navigator.serviceWorker.register("./sw.js").then(
     (registration) => {
       console.log("Service worker registration succeeded:", registration);
     },

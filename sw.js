@@ -1,5 +1,5 @@
 let cacheName = 'fall-plan-cache'
-let precachedResources = ['/', '/logo-180.png', '/logo-192.png', '/logo-512.png', '/index.html', '/style.css', '/test.js']
+let precachedResources = ['./', './logo-180.png', './logo-192.png', './logo-512.png', './index.html', './style.css', './test.js']
 
 async function networkFirst(request) {
   try {
