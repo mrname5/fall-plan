@@ -1,5 +1,5 @@
 let cacheName = 'fall-plan-cache'
-let precachedResources = ['/', 'logo-192.png', '/logo-512.png', '/index.html', '/style.css', '/test.js']
+let precachedResources = ['/', '/logo-180.png', '/logo-192.png', '/logo-512.png', '/index.html', '/style.css', '/test.js']
 
 async function networkFirst(request) {
   try {
@@ -35,4 +35,5 @@ self.addEventListener("install", (event) => {
  * https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register
  * https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
  * https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable
+ * https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Manifest_file#app_presentation
  */
