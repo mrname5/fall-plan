@@ -48,6 +48,9 @@ div {
 }
 
 @media (orientation: portrait) {
+    body {
+        font-size: 60px;
+    }
     div {
         font-size: 63px;
     }
@@ -59,5 +62,11 @@ div {
     h1 {
         font-size: 68px;
         font-weight: bolder;
+    }
+    label {
+        font-size: 60px;
+    }
+    span {
+        font-size: 60px;
     }
 }
