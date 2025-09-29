@@ -17,6 +17,7 @@ getLocationButton.onclick = function (e) {
     navigator.geolocation.getCurrentPosition((x) => {
         locationInfo = x
         console.log('location get successful', locationInfo)
+        locText.value = JSON.stringify(x)
     }, console.log)
 }
 
