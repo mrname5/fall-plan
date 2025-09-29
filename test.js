@@ -1,19 +1,25 @@
 let enterButton = document.getElementById('enter')
 let locText = document.getElementById('location-info')
-let locDrop = document.getElementById('location-dropdown')
+let getLocationButton = document.getElementById('getLocation')
 let dropHeightElem = document.getElementById('dropHeight')
 let windSpeed = document.getElementById('windSpeed')
 let windDir = document.getElementById('windDir')
 let resultBox = document.getElementById('resultBox')
-// let locationInfo;
+let timeDrop = document.getElementById('time-dropdown')
+let timeInput = document.getElementById('customTime')
+let locationInfo;
 
 enterButton.onclick = function (e) {
-    resultBox.textContent = locText.value + locDrop.value + dropHeightElem.value + windSpeed.value + windDir.value
+    resultBox.textContent = locText.value + dropHeightElem.value + windSpeed.value + windDir.value
 }
 
-// navigator.geolocation.getCurrentPosition((x) => {
-//     locationInfo = x
-// }, console.log)
+getLocationButton.onclick = function (e) {
+    navigator.geolocation.getCurrentPosition((x) => {
+        locationInfo = x
+        console.log('location get successful', locationInfo)
+    }, console.log)
+}
+
 
 //source: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register
 if ("serviceWorker" in navigator) {
