@@ -20,12 +20,11 @@ function calculateDrop () {
 
 getLocationButton.onclick = function (e) {
     navigator.geolocation.getCurrentPosition((x) => {
-        console.log('location get successful', locationInfo)
-        let locData = JSON.stringify(x)
-        fetchFromOpenMeteo(locData.coords.latitude, locData.coords.longitude)
         locationInfo = x
-        latInfo.value = locData.coords.latitude
-        longInfo.value = locData.coords.longitude
+        console.log('location get successful', locationInfo)
+        fetchFromOpenMeteo(locationInfo.coords.latitude, locationInfo.coords.longitude)
+        latInfo.value = locationInfo.coords.latitude
+        longInfo.value = locationInfo.coords.longitude
     }, console.log)
 }
 
