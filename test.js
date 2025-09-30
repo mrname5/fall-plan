@@ -22,6 +22,7 @@ getLocationButton.onclick = function (e) {
     navigator.geolocation.getCurrentPosition((x) => {
         locationInfo = x
         console.log('location get successful', locationInfo)
+        resultBox.value = locationInfo
         fetchFromOpenMeteo(locationInfo.coords.latitude, locationInfo.coords.longitude)
         latInfo.value = locationInfo.coords.latitude
         longInfo.value = locationInfo.coords.longitude
