@@ -61,6 +61,7 @@ function writeCurrentWeatherData (currentData) {
         windDir.value = currentData['wind_direction_10m'][time]
         windSpeed.value = currentData['wind_speed_10m'][time]
     }
+    checkIfAllFieldsInputted()
 }
 
 async function fetchFromOpenMeteo (latitude, longitude) {
