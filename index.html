@@ -12,42 +12,40 @@
 <link rel='stylesheet' href='style.css'>
         <!-- Item 1: Text input OR dropdown -->
     <div class="form-row">
-      <label for="location">Location:</label><br>
-      <input type="text" id="location-info" placeholder="Text input">
+      <label for="location">Location (Latitude, Longitude):</label><br>
+      <input type="number" id="lat-info" placeholder="Latitide">
+      <input type="number" id="long-info" placeholder="Longitude">
       <span>OR</span>
       <button id='getLocation' type="submit">Get Current Location</button>
     </div>
     <!-- Item 2: Number input -->
     <div class="form-row">
       <label for="drop-height">Drop Height:</label><br>
-      <input type="number" id="dropHeight">
+        <input type="number" id="dropHeight" value="3050">
+        <span> meters </span>
     </div>
     <div class="form-row">
       <label for="drop-height">Time: </label><br>
-      <select id="time-dropdown">
-        <option value="">--Select--</option>
-        <option value="now">now</option>
-        <option value="addOne">+ 1hr</option>
-        <option value="addTwo">+ 2hr</option>
-        <option value="addThree">+ 3hr</option>
-      </select>
-      <span>OR</span>
-      <input type="number" id="customTime" placeholder="Time in hours">
+      <input type="number" id="time" placeholder="Time in hours" value="0">
+<span> Hours </span>
     </div>
     <!-- Item 2: Number input -->
     <div class="form-row">
       <label for="wind-speed">Wind Speed:</label><br>
       <input type="number" id="windSpeed">
+        <span> km/h </span>
     </div>
     <!-- Item 2: Number input -->
     <div class="form-row">
       <label for="wind-direction">Wind Direction:</label><br>
       <input type="number" id="windDir">
+      <span> ° </span>
     </div>
-    <!-- Enter button -->
+    <!-- Enter button
     <div class="form-row">
       <button id='enter' type="submit">Enter</button>
     </div>
+    -->
       <div id="resultBox">Results will appear here...</div>
     <script src='test.js'> </script>
 </html

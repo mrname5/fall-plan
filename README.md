@@ -21,3 +21,10 @@ Use Safari.
 Follow the section: Add a website icon to your Home Screen
 
 https://support.apple.com/en-il/guide/iphone/iph42ab2f3a7/ios
+
+## Features:
+Automatic formatting of coordinates when pasting.
+
+Automatic wind data retreival from [Open Meteo](https://open-meteo.com/)
+
+Current location retreival.
