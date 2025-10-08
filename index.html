@@ -11,41 +11,233 @@
 <h1> Fall Plan </h1>
 <link rel='stylesheet' href='style.css'>
         <!-- Item 1: Text input OR dropdown -->
-    <div class="form-row">
-      <label for="location">Location (Latitude, Longitude):</label><br>
-      <input type="number" id="lat-info" placeholder="Latitide">
-      <input type="number" id="long-info" placeholder="Longitude">
-      <span>OR</span>
+    <div id='locationItems' class="form-row">
+      <label for="location">Location:</label><br>
+        <table>
+            <thead>
+                <tr> 
+                    <th> Latitude </th>
+                    <th> Longitude </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr> 
+                        <td><input type="number" id="lat-info" placeholder="Latitide"></td>
+                        <td><input type="number" id="long-info" placeholder="Longitude"></td>
+                </tr>
+            </tbody>
+        </table>
       <button id='getLocation' type="submit">Get Current Location</button>
     </div>
     <!-- Item 2: Number input -->
     <div class="form-row">
-      <label for="drop-height">Drop Height:</label><br>
-        <input type="number" id="dropHeight" value="3050">
-        <span> meters </span>
+      <label for="drop-height">Drop Info:</label><br>
+        <table>
+            <tr> 
+                <th> Drop Height (ft)</th>
+                <th> Pull Height (ft) </th>
+            </tr>
+            <tr> 
+                <td><input type="number" id="drop-info" value="11000"></td>
+                <td><input type="number" id="pull-info" value ="4000"></td>
+            </tr>
+        </table>
     </div>
     <div class="form-row">
-      <label for="drop-height">Time: </label><br>
-      <input type="number" id="time" placeholder="Time in hours" value="0">
-<span> Hours </span>
+      <label for="constants">Constant Info:</label><br>
+        <table>
+            <thead>
+                <tr> 
+                    <th> Freefall Constant </th>
+                    <th> Canopy Constant </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr> 
+                    <td><input type="number" id="freefallK-info" value="3"></td>
+                    <td><input type="number" id="canopyK-info" value="30"></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <!-- Item 2: Number input -->
     <div class="form-row">
-      <label for="wind-speed">Wind Speed:</label><br>
-      <input type="number" id="windSpeed">
-        <span> km/h </span>
+      <label for="others">Other Info:</label><br>
+        <table>
+            <thead>
+                <tr> 
+                    <th> Ground Speed (kts)</th>
+                    <th> Conversion Factor (CF) </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr> 
+                    <td><input type="number" id="groundSpeed-info" value="100"></td>
+                    <td><input type="number" id="conversion-info" value="0.51"></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <!-- Item 2: Number input -->
     <div class="form-row">
-      <label for="wind-direction">Wind Direction:</label><br>
-      <input type="number" id="windDir">
-      <span> ° </span>
+      <label for="time">Time: </label>
+      <input type="number" id="time" placeholder="Time in hours" value="0"><small> Hours </small>
     </div>
-    <!-- Enter button
     <div class="form-row">
-      <button id='enter' type="submit">Enter</button>
+        <label for="disp">Dispertion:</label>
+        <br>
+            <span>Interval: </span>
+            <input type="number" id="dispInterval" value="5"> <small> seconds </small>
+            <br>
+<span> Dispertion Equation </span>
+        <table>
+            <thead>
+                <tr> 
+                    <th> Ground Speed</th>
+                    <td> X </td>
+                    <th> Total Interval </th>
+                    <td> X </td>
+                    <th> CF </th>
+                    <td> = </td>
+                    <th> Meters </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr> 
+                    <td><input type="number" id="disGS" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="disInt" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="disCon" class="read"></td>
+                    <td> = </td>
+                    <td><input type="number" id="disMeter" class="read"></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    -->
-      <div id="resultBox">Results will appear here...</div>
+    <div class="form-row">
+        <label for="fthrow">Forward Throw:</label>
+        <br>
+            <span>Deceleration Quotient (DQ): </span>
+            <input type="number" id="dqInfo" value="2.7">
+<br>
+<span> Forward Throw Equation </span>
+        <table>
+            <thead>
+                <tr> 
+                    <th> DQ </th>
+                    <td> X </td>
+                    <th> Ground Speed </th>
+                    <td> X </td>
+                    <th> CF </th>
+                    <td> = </td>
+                    <th> Meters </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr> 
+                    <td><input type="number" id="dqInput" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="deGs" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="deCon" class="read"></td>
+                    <td> = </td>
+                    <td><input type="number" id="deMeter" class="read"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="form-row">
+        <label for="Halo">HALO:</label><br>
+        <div id='fd-wind'></div>
+<br>
+<span> Freefall Drift </span>
+        <table>
+            <thead>
+                <tr> 
+                    <th> Constant (K) </th>
+                    <td> X </td>
+                    <th> Altitude (K) </th>
+                    <td> X </td>
+                    <th> Avg Wind (kts) </th>
+                    <td> = </td>
+                    <th> Meters </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr> 
+                    <td><input type="number" id="ffdk" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="ffda" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="ffdw" class="read"></td>
+                    <td> = </td>
+                    <td><input type="number" id="ffdm" class="read"></td>
+                </tr>
+            </tbody>
+        </table>
+<br>
+        <div id='cd-wind'></div>
+<br>
+<span> Canopy Drift </span>
+        <table>
+            <thead>
+                <tr> 
+                    <th> Constant (K) </th>
+                    <td> X </td>
+                    <th> Altitude (K) </th>
+                    <td> X </td>
+                    <th> Avg Wind (kts) </th>
+                    <td> = </td>
+                    <th> Meters </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr> 
+                    <td><input type="number" id="cdk" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="cda" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="cdw" class="read"></td>
+                    <td> = </td>
+                    <td><input type="number" id="cdm" class="read"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="form-row">
+        <label for="Haho">HAHO:</label><br>
+        <div id='wind-table'></div>
+        <br>
+            <span>Forward Speed (FS): </span>
+            <input type="number" id="fsInput" value="22.6">
+<br>
+            <span>Safety Factor (SF): </span>
+            <input type="number" id="sfInput" value="4">
+            <br>
+<span> Canopy Drift </span>
+        <table>
+            <thead>
+                <tr> 
+                    <th> FS + V </th>
+                    <td> X </td>
+                    <th> Alt (K) - SF </th>
+                    <td> ÷ </td>
+                    <th> Constant (K) </th>
+                    <td> = </td>
+                    <th> NM </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr> 
+                    <td><input type="number" id="hcdfsv" class="read"></td>
+                    <td> X </td>
+                    <td><input type="number" id="hcdAltSf" class="read"></td>
+                    <td> ÷ </td>
+                    <td><input type="number" id="hcdk" class="read"></td>
+                    <td> = </td>
+                    <td><input type="number" id="hcdnm" class="read"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <script src='test.js'> </script>
-</html
+</html>

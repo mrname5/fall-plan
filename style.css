@@ -13,12 +13,41 @@ margin-bottom: 15px;
 }
 
 /* Inputs and selects styling */
-input, select, button {
+input, select, button{
 background-color: #222; /* dark input background */
 color: white;
 border: 1px solid #555;
-padding: 10px 10px;
+padding: 5px 5px;
 font-size: 1rem;
+}
+
+th {
+    background-color: #222; /* dark input background */
+    color: white;
+    border: 1px solid #555;
+    padding: 5px 5px;
+    padding-left: 0px;
+    font-size: 1rem;
+}
+
+input {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+th{
+    width: 25%;
+    text-align: center;
+}
+
+td{
+    width: 3%;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
 }
 
 /* Button hover effect */
@@ -47,6 +76,10 @@ div {
   white-space: pre-wrap; /* preserves line breaks */
 }
 
+span {
+    font-size: 18px;
+}
+
 @media (orientation: portrait) {
     body {
         font-size: 60px;
@@ -69,4 +102,14 @@ div {
     span {
         font-size: 50px;
     }
+    th {
+        font-size: 40px;
+    }
+    td {
+        font-size: 38px;
+    }
+}
+
+.read {
+    background-color: grey;
 }
