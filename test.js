@@ -684,7 +684,7 @@ function checkIfUpdateWindTables (e) {
         checkWhichTablesToPopulate()
         return true
     }
-    else if (e.target === dropHeightElem || e.target === pullHeightElem || e.target === latInfo || e.target === longInfo) {
+    else if (e.target === dropHeightElem || e.target === pullHeightElem || e.target === latInfo || e.target === longInfo || e.target === freefallKElem || e.target === canopyKElem) {
         checkWhichTablesToPopulate()
         return true
     }
