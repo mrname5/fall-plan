@@ -454,7 +454,8 @@ function populateFfdCalcTable (windData, fallAlt, tableResult){
     document.getElementById('ffdm').value = JSON.parse(k) * fallAlt * tableResult.velocity.average
 }
 
-function populateFdWindTable (windData) {
+function populateFdWindTable (tableData) {
+    let fdWind = document.getElementById('fd-wind')
     let dropHeight = document.getElementById('drop-info').value
     let pullHeight = document.getElementById('pull-info').value
     let tableElem = document.getElementById('fd-wind')
@@ -463,13 +464,14 @@ function populateFdWindTable (windData) {
     }
     dropHeight = JSON.parse(dropHeight)
     pullHeight = JSON.parse(pullHeight)
-    if (windData === undefined) {
-        windData = calcWindAltitudeRangeData(dropHeight, pullHeight)
+    let windData = calcWindAltitudeRangeData(dropHeight, pullHeight)
+    if (tableData === undefined) {
+        tableData = createWindTable(windData)
     }
-    let tableData = createWindTable(windData)
     let tableResult = calculateTableResult(tableData)
     let tableHtml = tableToHtml(tableElem, tableData, tableResult, 'WIND DATA FOR FFD')
     populateFfdCalcTable(windData, (dropHeight - pullHeight) / 1000, tableResult)
+    fdWind.addEventListener('change', () =>{ console.log('fd table change');populateFdWindTable(objectFromTable(fdWind.children[0]))})
 }
 
 function populateCdCalcTable (windData, fallAlt, tableResult){
@@ -483,7 +485,8 @@ function populateCdCalcTable (windData, fallAlt, tableResult){
     document.getElementById('cdm').value = JSON.parse(k) * fallAlt * tableResult.velocity.average
 }
 
-function populateCdWindTable () {
+function populateCdWindTable (tableData) {
+    let cdWind = document.getElementById('cd-wind')
     let pullHeight = document.getElementById('pull-info').value
     let tableElem = document.getElementById('cd-wind')
     if (isNaN(pullHeight)) {
@@ -491,10 +494,13 @@ function populateCdWindTable () {
     }
     pullHeight = JSON.parse(pullHeight)
     let windData = calcWindAltitudeRangeData(pullHeight, 1000)
-    let tableData = createWindTable(windData)
+    if (tableData === undefined) {
+        tableData = createWindTable(windData)
+    }
     let tableResult = calculateTableResult(tableData)
     let tableHtml = tableToHtml(tableElem, tableData, tableResult, 'WIND DATA FOR CD')
     populateCdCalcTable(windData, pullHeight / 1000, tableResult)
+    cdWind.addEventListener('change', () =>{console.log('cd table change'); populateCdWindTable(objectFromTable(cdWind.children[0]))})
 }
 
 let windCalcWindData;
@@ -518,17 +524,21 @@ function populateWindCalcTable (windData, fallAlt, tableResult){
     document.getElementById('hcdnm').value = (hcdfsv * hcdAltSf) / k
 }
 
-function populateWindTable () {
+function populateWindTable (tableData) {
+    let windTable = document.getElementById('wind-table')
     let dropHeight = document.getElementById('drop-info').value
     let tableElem = document.getElementById('wind-table')
     if (isNaN(dropHeight)) {
         return false
     }
     let windData = calcWindAltitudeRangeData(JSON.parse(dropHeight), 1000)
-    let tableData = createWindTable(windData)
+    if (tableData === undefined) {
+        tableData = createWindTable(windData)
+    }
     let tableResult = calculateTableResult(tableData)
     let tableHtml = tableToHtml(tableElem, tableData, tableResult, 'WIND DATA')
     populateWindCalcTable(windData, dropHeight / 1000, tableResult)
+    windTable.addEventListener('change', () =>{ console.log('wind table change');populateWindTable(objectFromTable(windTable.children[0]))})
 }
 
 function checkIfUpdateWindTableHaho (e) {
@@ -626,7 +636,6 @@ time.onchange = (e) => {
 // windDir.onchange = checkIfAllFieldsInputted
 // windSpeed.onchange = checkIfAllFieldsInputted
 
-let windTable = document.getElementById('windTable')
 
 function windTableChanged () {
     let dropHeight = document.getElementById('drop-info').value
@@ -649,11 +658,25 @@ function objectFromTable (table) {
     const tableContent = {};
     rows.forEach(row => {
        const cells = row.querySelectorAll("td");
-        if (cells.length > 2) {
-           tableContent[cells[0].children[0].value] = {direction: JSON.parse(cells[1].children[0].value), velocity: JSON.parse(cells[2].children[0].value)}
+        if (cells.length <= 2) {
+            return false
         }
+        let dataObject = {}
+        if (isNaN(cells[1].children[0].value) === false && cells[1].children[0].value !== "") {
+            dataObject.direction = JSON.parse(cells[1].children[0].value)
+        }
+        else {
+            dataObject.direction = 0
+        }
+        if (isNaN(cells[2].children[0].value) === false && cells[2].children[0].value !== "") {
+            dataObject.velocity = JSON.parse(cells[2].children[0].value)
+        }
+        else {
+            dataObject.velocity = 0
+        }
+       tableContent[cells[0].children[0].value] = dataObject
     });
-    return result
+    return tableContent
 }
 
 function checkIfUpdateWindTables (e) {
