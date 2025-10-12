@@ -23,8 +23,64 @@ let allWeatherData;
 let networkConnected = true
 let forSpeed = document.getElementById('fsInput')
 let safeFact = document.getElementById('sfInput')
+let dqSelect = document.getElementById('dqSelect')
+let gsSelect = document.getElementById('gsSelect')
+let dbName = 'fallPointDb'
+let dbStoreNames = ['loc', 'dropInfo', 'currentWindData', 'allWindData', 'halo', 'haho', 'checklist']
+let storeName = 'localSave'
 
-let changeInputs = [dropHeightElem, pullHeightElem, freefallKElem, canopyKElem, groupSpeedElem, conversionElem, dispIntervalElem, dqInfo, forSpeed, safeFact]
+function openDb () {
+    return new Promise((resolve, reject) => {
+        let request = indexedDB.open(dbName, 1)
+        request.onupgradeneeded = (event) => {
+          let db = event.target.result;
+            if (!db.objectStoreNames.contains(storeName)) {
+              let objectStore = db.createObjectStore(storeName, { keyPath: "myKey" });
+            }
+        };
+        request.onsuccess = () => {resolve(request.result)}
+        request.onerror = () => {resolve(request.error)}
+    })
+}
+
+async function writeDb (data) {
+    console.log('writedb', data)
+    return new Promise(async (resolve, reject) => {
+        let db = await openDb()
+        let tx = db.transaction(storeName, 'readwrite')
+        let store =  tx.objectStore(storeName)
+        store.put(data)
+        await tx.done
+        db.close()
+        resolve(true)
+    })
+}
+
+async function getDb (key) {
+    let db = await openDb()
+    let tx = db.transaction(storeName, 'readwrite')
+    let store =  tx.objectStore(storeName)
+    let request = store.get(key)
+    let result = await new Promise ((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result)
+        request.onerror = () => reject(request.error)
+    })
+    await tx.done;
+    db.close()
+    return result
+}
+
+async function clearDb () {
+    let db = await openDb()
+    let tx = db.transaction(storeName, 'readwrite')
+    let store =  tx.objectStore(storeName)
+    await store.clear()
+    await tx.done;
+    db.close()
+    return true
+}
+
+let changeInputs = [dropHeightElem, pullHeightElem, freefallKElem, canopyKElem, groupSpeedElem, conversionElem, dispIntervalElem, dqInfo, forSpeed, safeFact, time]
 
 function enforceReadOnly () {
     let items = document.getElementsByClassName('read')
@@ -69,12 +125,40 @@ function calculateDrop () {
 //     resultBox.textContent = latInfo.value + longInfo.value + dropHeightElem.value + windSpeed.value + windDir.value
 // }
 
+let gsConversion = {
+    '': '',
+    '10C': 130,
+    'F50': 120,
+    'CH': 90,
+    '15C': 150,
+    '20C': 180,
+}
+
+function overwriteGsInfo () {
+    groupSpeedElem.value = gsConversion[gsSelect.value]
+}
+
+gsSelect.onchange = overwriteGsInfo
+
+function saveDispertion (info) {
+    info.myKey = 'disp'
+    writeDb(info)
+    return true
+}
+
+async function writeDispertion (info) {
+    let data = await getDb('disp')
+    populateDispertionTable(data.result)
+    return true
+}
+
 let dispertionInfo;
 function calculateDispertion () {
     let info = {'speed': JSON.parse(groupSpeedElem.value), "interval": JSON.parse(dispIntervalElem.value), "conversion": JSON.parse(conversionElem.value)}
     info.output = info.speed * info.interval * info.conversion
     dispertionInfo = info
     populateDispertionTable(info)
+    saveDispertion(info)
     return info
 }
 
@@ -83,10 +167,21 @@ function populateDispertionTable (info) {
     let items = names.map(x => {
         return document.getElementById(x)
     })
-    items[0].value = info.speed
-    items[1].value = info.interval
-    items[2].value  = info.conversion
-    items[3].value = info.output
+    let vars = ['speed', 'interval', 'conversion', 'output'].map(x => {
+        return info[x]
+    })
+    if (vars.includes(undefined)) {
+        return 'false'
+    }
+    try { 
+        items[0].value = info.speed
+        items[1].value = info.interval
+        items[2].value  = info.conversion
+        items[3].value = info.output
+    }
+    catch (e) {
+        console.log('populateDispertionTable', e)
+    }
 }
 
 function checkIfUpdateDispertionTable (e) {
@@ -101,12 +196,29 @@ function checkIfUpdateDispertionTable (e) {
     return false
 }
 
+function saveFt (info) {
+    if (info === undefined) {
+        return false
+    }
+    info.myKey = 'ft'
+    writeDb(info)
+    return true
+}
+
+async function writeFt () {
+    let data = await getDb('ft')
+    populateFtTable(info.result)
+    return true
+}
+
+
 let ftInfo;
 function calculateFt () {
     let info = {'speed': JSON.parse(groupSpeedElem.value), "dq": JSON.parse(dqInfo.value), "conversion": JSON.parse(conversionElem.value)}
     info.output = info.speed * info.dq * info.conversion
     ftInfo = info
     populateFtTable(info)
+    saveFt(info)
     return info
 }
 
@@ -116,6 +228,20 @@ function populateFtTable (info) {
     deCon.value  = info.conversion
     deMeter.value = info.output
 }
+
+let dqConversion = {
+    '5000': 2.5,
+    '10000': 2.7,
+    '15000': 2.8,
+    '20000': 3,
+    '': '',
+}
+
+function overwriteDqInfo () {
+    dqInfo.value = dqConversion[dqSelect.value]
+}
+
+dqSelect.onchange = overwriteDqInfo
 
 function checkIfCalculateFt (e) {
     if (isNaN(dqInfo.value) || isNaN(groupSpeedElem.value) || isNaN(conversionElem.value)) {
@@ -279,6 +405,8 @@ async function fetchFromOpenMeteo (latitude, longitude) {
         handleTimeChange(fetchedData)
 //         checkWhichTablesToPopulate()
         checkWhichItemsToUpdate()
+        fetchedData.myKey = 'fetchedWeatherData'
+        writeDb(fetchedData)
         return fetchedData
     }
     catch (e) {
@@ -448,10 +576,28 @@ function populateFfdCalcTable (windData, fallAlt, tableResult){
     if (isNaN(k)) {
         return false
     }
-    document.getElementById('ffdk').value = k
-    document.getElementById('ffda').value = fallAlt
-    document.getElementById('ffdw').value = tableResult.velocity.average
-    document.getElementById('ffdm').value = JSON.parse(k) * fallAlt * tableResult.velocity.average
+    let info = {k, fallAlt, wind: tableResult.velocity.average, result: JSON.parse(k) * fallAlt * tableResult.velocity.average}
+    document.getElementById('ffdk').value = info.k
+    document.getElementById('ffda').value = info.fallAlt
+    document.getElementById('freefallA-info').value = info.fallAlt
+    document.getElementById('ffdw').value = info.wind
+    document.getElementById('ffdm').value = info.result
+    document.getElementById('freefallW-info').value = info.wind
+    document.getElementById('freefall-result').value = info.result
+    info.myKey = 'fdCalc'
+    writeDb(info)
+    return true
+}
+
+function saveFdWindTable (tableData) {
+    tableData.myKey = 'fd'
+    writeDb(tableData)
+}
+
+async function writeFdWindTable () {
+    let data = await getDb('fd')
+    populateFdWindTable(data.result)
+    return true
 }
 
 function populateFdWindTable (tableData) {
@@ -472,17 +618,46 @@ function populateFdWindTable (tableData) {
     let tableHtml = tableToHtml(tableElem, tableData, tableResult, 'WIND DATA FOR FFD')
     populateFfdCalcTable(windData, (dropHeight - pullHeight) / 1000, tableResult)
     fdWind.addEventListener('change', () =>{ console.log('fd table change');populateFdWindTable(objectFromTable(fdWind.children[0]))})
+    saveFdWindTable(tableData)
+}
+
+function saveCdCalc (info) {
+    info.myKey = 'cdCalc'
+    writeDb(info)
 }
 
 function populateCdCalcTable (windData, fallAlt, tableResult){
     let k = canopyKElem.value
-    if (isNaN(k)) {
+    if (isNaN(k) && k !== '') {
         return false
     }
-    document.getElementById('cdk').value = k
-    document.getElementById('cda').value = fallAlt
-    document.getElementById('cdw').value = tableResult.velocity.average
-    document.getElementById('cdm').value = JSON.parse(k) * fallAlt * tableResult.velocity.average
+    let info = {
+        k, 
+        fallAlt,
+        wind: tableResult.velocity.average,
+        result: JSON.parse(k) * fallAlt * tableResult.velocity.average,
+    }
+    document.getElementById('cdk').value = info.k
+    document.getElementById('cda').value = info.fallAlt
+    document.getElementById('cdw').value = info.wind
+    document.getElementById('cdm').value = info.result
+    document.getElementById('canopyA-info').value = info.fallAlt
+    document.getElementById('canopyW-info').value = info.wind
+    document.getElementById('canopy-result').value = info.result
+    saveCdCalc(info)
+}
+
+function saveCdWindTable (tableData) {
+    tableData.myKey = 'cd'
+    writeDb(tableData)
+}
+
+async function writeCdWindTable () {
+    let data = await getDb('cd')
+    let kData = await getDb('cdCalc')
+    canopyKElem.value = kData
+    populateCdWindTable(data.result)
+    return true
 }
 
 function populateCdWindTable (tableData) {
@@ -501,6 +676,12 @@ function populateCdWindTable (tableData) {
     let tableHtml = tableToHtml(tableElem, tableData, tableResult, 'WIND DATA FOR CD')
     populateCdCalcTable(windData, pullHeight / 1000, tableResult)
     cdWind.addEventListener('change', () =>{console.log('cd table change'); populateCdWindTable(objectFromTable(cdWind.children[0]))})
+    saveCdWindTable(tableData)
+}
+
+function saveWindCalc (info) {
+    info.myKey = 'windCalc'
+    writeDb(info)
 }
 
 let windCalcWindData;
@@ -518,10 +699,30 @@ function populateWindCalcTable (windData, fallAlt, tableResult){
     sf = JSON.parse(sf)
     let hcdfsv = fs + tableResult.velocity.average
     let hcdAltSf = fallAlt - sf
-    document.getElementById('hcdfsv').value = hcdfsv
-    document.getElementById('hcdAltSf').value = hcdAltSf
-    document.getElementById('hcdk').value = k
-    document.getElementById('hcdnm').value = (hcdfsv * hcdAltSf) / k
+    let info = {
+        hcdfsv,
+        hcdAltSf,
+        k,
+        result: (hcdfsv * hcdAltSf) / k
+    }
+    document.getElementById('hcdfsv').value = info.hcdfsv
+    document.getElementById('hcdAltSf').value = info.hcdAltSf
+    document.getElementById('hcdk').value = info.k
+    document.getElementById('hcdnm').value = info.result
+    saveWindCalc(info)
+}
+
+function saveWindTable (tableData) {
+    tableData.myKey = 'wind'
+    writeDb(tableData)
+}
+
+async function writeWindTable () {
+    let data = await getDb('wind')
+    let kData = await getDb('windCalc')
+    canopyKElem.value = kData
+    populateWindTable(data.result)
+    return true
 }
 
 function populateWindTable (tableData) {
@@ -539,6 +740,7 @@ function populateWindTable (tableData) {
     let tableHtml = tableToHtml(tableElem, tableData, tableResult, 'WIND DATA')
     populateWindCalcTable(windData, dropHeight / 1000, tableResult)
     windTable.addEventListener('change', () =>{ console.log('wind table change');populateWindTable(objectFromTable(windTable.children[0]))})
+    saveWindTable(tableData)
 }
 
 function checkIfUpdateWindTableHaho (e) {
@@ -596,10 +798,25 @@ function checkIfAllFieldsInputted () {
     }
 }
 
+function saveCurrentLocation () {
+    if (longInfo.value !== '' && latInfo.value !== '') {
+        writeDb({myKey: 'loc', longInfo: longInfo.value, latInfo: latInfo.value})
+    }
+}
+
+async function writeCurrentLocation () {
+    let data = await getDb('loc')
+    data = data.result
+    longInfo.value = data.longInfo
+    latInfo.value = data.latInfo
+    return true
+}
+
 function whenLocationChange () {
     console.log('change detected')
     if (latInfo.value !== '' && longInfo.value !== '') {
         fetchFromOpenMeteo(JSON.parse(latInfo.value), JSON.parse(longInfo.value))
+        saveCurrentLocation()
 //         checkIfAllFieldsInputted()
     }
 }
@@ -691,10 +908,46 @@ function checkIfUpdateWindTables (e) {
     return false
 }
 
-let changios;
+function saveDropInfo () {
+    writeDb({myKey: 'dropInfo', jump: dropHeightElem.value, pull: pullHeightElem})
+}
+
+async function writeDropInfo () {
+    let data = await getDb('dropInfo')
+    if (data === undefined) {
+        return false
+    }
+    dropHeightElem.value = data.dropHeight
+    pullHeightElem.value = data.pullHeightElem
+    return true
+}
+
+function saveHour () {
+    writeDb({myKey: 'hour', hour: timeInput.value})
+}
+
+async function writeHour () {
+    let data = await getDb('hour')
+    timeInput.value = data.hour
+    return true
+}
+
+function checkWhichItemsToSave (e) {
+    if (e === undefined) {
+        return false
+    }
+    console.log(e.target)
+    if (e.target === dropHeightElem || e.target === pullHeightElem) {
+        saveDropInfo() 
+    }
+    else if (e.target === timeInput) {
+        saveHour()
+    }
+}
+
 function checkWhichItemsToUpdate (e) {
-    changios = e
-    console.log('chagne detected')
+    checkWhichItemsToSave(e)
+    console.log('chagne detected', e)
     checkIfUpdateDispertionTable(e)
     checkIfCalculateFt(e)
     checkIfUpdateWindTables(e)
@@ -704,3 +957,100 @@ function checkWhichItemsToUpdate (e) {
 changeInputs.forEach(x => {
     x.onchange = checkWhichItemsToUpdate
 })
+
+let radios = document.querySelectorAll('input[name="picker"]');
+//selected = document.querySelector('input[name="picker"]:checked');
+
+function modeChange () {
+    console.log('wrfw')
+    let selected = document.querySelector('input[name="picker"]:checked');
+    let mode = selected.nextElementSibling.textContent
+    if (mode === 'HALO') {
+        document.getElementById('halo').style.display = 'block'
+        document.getElementById('haho').style.display = 'none'
+    }
+    else if (mode === 'HAHO') {
+        document.getElementById('haho').style.display = 'block'
+        document.getElementById('halo').style.display = 'none'
+    }
+}
+
+radios.forEach(x => {
+    x.addEventListener('change', modeChange)
+})
+
+function saveChecklistChange () {
+    let checklist = document.getElementById('checklist')
+    let checklistItems = checklist.querySelectorAll('input')
+    let info = {}
+    checklistItems.forEach((x, i) => {
+        info[String.fromCharCode(97 + i)] = x.value
+    })
+    info.myKey = 'checksdf'
+    console.log('shit', info)
+    writeDb(info)
+}
+
+async function writeChecklist () {
+    let checklist = document.getElementById('checklist')
+    let checklistItems = checklist.querySelectorAll('input')
+    let info = await getDb('checksdf')
+    info = info.result
+    checklistItems.forEach((x, i) => {
+        checklistItems[i].value = info[String.fromCharCode(97 + i)]
+    })
+}
+
+function handleChecklistEvents () {
+    let checklist = document.getElementById('checklist')
+    let checklistItems = checklist.querySelectorAll('input')
+    checklistItems.forEach(x => {
+        x.onchange = saveChecklistChange
+    })
+}
+
+handleChecklistEvents()
+
+window.addEventListener('unload', (e) => {
+    console.log('delete unload')
+//     localStorage.setItem('reloaded', true)
+    sessionStorage.setItem('reload', 'true')
+})
+
+window.addEventListener('beforeunload', (e) => {
+    console.log('delete before unload')
+//     localStorage.setItem('reloaded', true)
+    sessionStorage.setItem('reload', 'true')
+})
+
+function loadSave () {
+    writeDispertion()
+    writeFt()
+    writeFdWindTable()
+    writeCdWindTable()
+    writeWindTable()
+    writeCurrentLocation()
+    writeDropInfo()
+    writeHour()
+    writeChecklist()
+}
+
+window.addEventListener('load', (e) => {
+//     if (localStorage.getItem('reloaded') === "true") {
+//         console.log('starting fresh')
+//         clearDb()
+//         localStorage.setItem('reloaded', false)
+//     }
+//     else {
+//         console.log('loading save')
+//         loadSave()
+//     }
+    if (sessionStorage.getItem('reload') !== null) {
+        console.log('detected reload')
+        document.getElementsByTagName('h1')[0].style.color = 'red'
+    }
+    else {
+        console.log('normal start')
+    }
+})
+
