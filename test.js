@@ -151,7 +151,9 @@ function saveDispertion (info) {
 
 async function writeDispertion (info) {
     let data = await getDb('disp')
-    populateDispertionTable(data.result)
+    if (typeof data !== 'undefined') {
+        populateDispertionTable(data.result)
+    }
     return true
 }
 
@@ -210,7 +212,9 @@ function saveFt (info) {
 
 async function writeFt () {
     let data = await getDb('ft')
-    populateFtTable(info.result)
+    if (typeof data !== 'undefined') {
+        populateFtTable(data.result)
+    }
     return true
 }
 
@@ -606,7 +610,9 @@ function saveFdWindTable (tableData) {
 
 async function writeFdWindTable () {
     let data = await getDb('fd')
-    populateFdWindTable(data.result)
+    if (typeof data !== 'undefined') {
+        populateFdWindTable(data.result)
+    }
     return true
 }
 
@@ -638,7 +644,7 @@ function saveCdCalc (info) {
 
 function populateCdCalcTable (windData, fallAlt, tableResult){
     let k = canopyKElem.value
-    if (isNaN(k) && k !== '') {
+    if (isNaN(k) || k !== '') {
         return false
     }
     let info = {
@@ -665,8 +671,10 @@ function saveCdWindTable (tableData) {
 async function writeCdWindTable () {
     let data = await getDb('cd')
     let kData = await getDb('cdCalc')
-    canopyKElem.value = kData
+    if (data !== undefined) {
     populateCdWindTable(data.result)
+    }
+    canopyKElem.value = kData
     return true
 }
 
@@ -731,7 +739,9 @@ async function writeWindTable () {
     let data = await getDb('wind')
     let kData = await getDb('windCalc')
     canopyKElem.value = kData
-    populateWindTable(data.result)
+    if (data !== undefined) {
+        populateWindTable(data.result)
+    }
     return true
 }
 
@@ -816,6 +826,9 @@ function saveCurrentLocation () {
 
 async function writeCurrentLocation () {
     let data = await getDb('loc')
+    if (typeof data === 'undefined') {
+        return false
+    }
     data = data.result
     longInfo.value = data.longInfo
     latInfo.value = data.latInfo
@@ -936,7 +949,9 @@ function saveHour () {
 
 async function writeHour () {
     let data = await getDb('hour')
-    timeInput.value = data.hour
+    if (typeof data !== 'undefined') {
+        timeInput.value = data.hour
+    }
     return true
 }
 
@@ -1003,6 +1018,9 @@ async function writeChecklist () {
     let checklist = document.getElementById('checklist')
     let checklistItems = checklist.querySelectorAll('input')
     let info = await getDb('checksdf')
+    if (typeof info === 'undefined') {
+        return false
+    }
     info = info.result
     checklistItems.forEach((x, i) => {
         checklistItems[i].value = info[String.fromCharCode(97 + i)]
@@ -1156,12 +1174,17 @@ async function updateToAirport (x) {
 let airportsDisplayed;
 async function showAirports () {
     let area = document.getElementById('showAirport')
+    area.innerHTML = ''
+    let title = document.createElement('span')
+    title.innerText = 'Use As Location: '
+    area.appendChild(title)
+    area.style.display = 'block'
     await fetchAirportLocation()
     let airportsToShow  = sortAirportByClosest().slice(0, 5)
     airportsToShow = airportsToShow.filter((x) => x.distance < 10)
     airportsToShow.forEach(x => {
         let item = document.createElement('div')
-        item.innerText = x.name + ' as location'
+        item.innerText = x.name
         item.className = 'air'
         item.id = 'metar' + x.icao_code
         item.addEventListener('click', (x) => {
@@ -1170,4 +1193,5 @@ async function showAirports () {
         })
         area.appendChild(item)
     })
+    area.style.display = 'block'
 }

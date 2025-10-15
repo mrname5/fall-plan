@@ -80,6 +80,10 @@ span {
     font-size: 18px;
 }
 
+#showAirport div{
+    text-indent: 5%;
+}
+
 @media (orientation: portrait) {
     body {
         font-size: 60px;
