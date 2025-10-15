@@ -108,6 +108,16 @@ span {
     td {
         font-size: 38px;
     }
+    .picker {
+      max-width: 100%;
+  }
+  .picker label {
+    padding: 0.6em 0;
+  }
+  #pickContainer {
+      margin: 0px;
+      max-width: 100%;
+  }
 }
 
 .read {
@@ -149,15 +159,6 @@ span {
   background: #007bff;
   color: white;
 }
-
-/* Scale text nicely on smaller screens */
-@media (max-width: 400px) {
-  .picker label {
-    font-size: 0.9rem;
-    padding: 0.6em 0;
-  }
-}
-
 
 #haho {
     display: none;

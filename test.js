@@ -1055,9 +1055,13 @@ window.addEventListener('load', (e) => {
     if (sessionStorage.getItem('reload') !== null) {
         console.log('detected reload')
         document.getElementsByTagName('h1')[0].style.color = 'red'
+        console.log('starting fresh')
+        clearDb()
+        localStorage.setItem('reloaded', false)
     }
     else {
         console.log('normal start')
+        loadSave()
     }
     latInfo.addEventListener('paste', handleCoordsPasting)
     latInfo.addEventListener('paste', handleCoordsPasting)
