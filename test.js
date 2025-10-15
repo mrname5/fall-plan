@@ -28,6 +28,9 @@ let gsSelect = document.getElementById('gsSelect')
 let dbName = 'fallPointDb'
 let dbStoreNames = ['loc', 'dropInfo', 'currentWindData', 'allWindData', 'halo', 'haho', 'checklist']
 let storeName = 'localSave'
+let airportDataLink = 'https://davidmegginson.github.io/ourairports-data/airports.csv'
+let lastUsedPos = {}
+//https://github.com/davidmegginson/ourairports-data
 
 function openDb () {
     return new Promise((resolve, reject) => {
@@ -106,7 +109,7 @@ function offlineActions () {
 
 function networkAdaptActions () {
     if (navigator.onLine) {
-        onlineActions()
+//         onlineActions()
     }
     else {
         offlineActions()
@@ -257,14 +260,20 @@ function checkIfCalculateFt (e) {
     }
     return false
 }
-getLocationButton.onclick = function (e) {
-    navigator.geolocation.getCurrentPosition((x) => {
+
+function updateLocation (x) {
         locationInfo = x
         console.log('location get successful', locationInfo)
 //         resultBox.value = locationInfo
         fetchFromOpenMeteo(locationInfo.coords.latitude, locationInfo.coords.longitude)
         latInfo.value = locationInfo.coords.latitude
         longInfo.value = locationInfo.coords.longitude
+        writeDb({myKey: 'preferedWind', type: 'current'})
+}
+
+getLocationButton.onclick = function (e) {
+    navigator.geolocation.getCurrentPosition((x) => {
+        updateLocation(x)
     }, console.log)
 }
 
@@ -812,13 +821,16 @@ async function writeCurrentLocation () {
     return true
 }
 
-function whenLocationChange () {
-    console.log('change detected')
+function whenLocationChange (x) {
+    console.log('loc change detected')
     if (latInfo.value !== '' && longInfo.value !== '') {
         fetchFromOpenMeteo(JSON.parse(latInfo.value), JSON.parse(longInfo.value))
         saveCurrentLocation()
 //         checkIfAllFieldsInputted()
     }
+//     if (x === undefined) {
+//         showAirports()
+//     }
 }
 
 function handleCoordsPasting (e) {
@@ -835,11 +847,6 @@ function handleCoordsPasting (e) {
     }
 }
 
-latInfo.addEventListener('paste', handleCoordsPasting)
-latInfo.addEventListener('paste', handleCoordsPasting)
-
-longInfo.onchange = whenLocationChange
-latInfo.onchange = whenLocationChange
 // dropHeightElem.onchange = checkIfAllFieldsInputted
 time.onchange = (e) => {
     if (currentWeatherData !== undefined) {
@@ -1052,5 +1059,110 @@ window.addEventListener('load', (e) => {
     else {
         console.log('normal start')
     }
+    latInfo.addEventListener('paste', handleCoordsPasting)
+    latInfo.addEventListener('paste', handleCoordsPasting)
+
+    longInfo.onchange = whenLocationChange
+    latInfo.onchange = whenLocationChange
 })
 
+let airportData;
+async function fetchAirportLocation () {
+    let res = await fetch(airportDataLink)
+    if (!res.ok) {
+        throw new Error ('Response status from github', res.status)
+    }
+    let fetchedData = await res.text()
+    let splitData = fetchedData.split('\n')
+    let names = splitData.slice(0, 1)[0].split(',').map(x => {
+        return JSON.parse(x)
+    })
+    airportData = splitData.slice(1).map((x, i) => {
+//         let splitInfo = x.split(',')
+        let splitInfo = x.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+        splitInfo = splitInfo.map(s => s.replace(/^"|"$/g, '').trim()); // remove quotes & spaces
+        let info = {}
+        names.forEach((n, i) => {
+            info[n] = splitInfo[i]
+        })
+        return info
+    })
+    let clonedData = {data: JSON.parse(JSON.stringify(airportData)), myKey: 'air'}
+    writeDb(clonedData)
+    writeDb({myKey: 'preferedWind', type: 'airport'})
+    return airportData
+}
+
+function sortAirportByClosest () {
+    let currentLong = JSON.parse(longInfo.value)
+    let currentLat = JSON.parse(latInfo.value)
+    airportData.forEach((x, i) => {
+        if (x['latitude_deg'] !== undefined && x['longitude_deg'] !== undefined) {
+            airportData[i].distance = haversine(currentLat, currentLong, JSON.parse(x.latitude_deg), JSON.parse(x.longitude_deg))
+        }
+    })
+    let ascending = airportData.sort((a, b) => a.distance - b.distance)
+    airportData = ascending
+    writeDb({myKey: 'air', data: ascending})
+    return ascending
+}
+
+// Great-circle distance (Haversine) in km
+function haversine(lat1, lon1, lat2, lon2) {
+    const toRad = d => d * Math.PI / 180;
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon/2)**2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+async function fetchMetar (icao) {
+//     let link = 'https://aviationweather.gov/api/data/metar?ids=' + icao + '&format=json&metar=true'
+    let link = 'https://script.google.com/macros/s/AKfycbzCXqTdp_ElLWRfWPpKZumHBkW7_echdSa2pGM1agLMIYf8sGgTCd2TW8-Ym3ZxS1U/exec?icao=' + icao
+    let res = await fetch (link)
+    let fetchedData = await res.json()
+    writeDb({myKey: 'metar' + icao, data: fetchedData[0]})
+    return fetchedData[0]
+}
+
+function useMetarData (fetchedData, currentAirportData) {
+    document.getElementById('surfaceWinds').value = fetchedData.wdir + '/' + fetchedData.wspd
+    lastUsedPos.lat = latInfo.value
+    lastUsedPos.lon = longInfo.value
+    latInfo.value = currentAirportData.latitude_deg
+    longInfo.value = currentAirportData.longitude_deg
+    whenLocationChange(true)
+    saveChecklistChange()
+}
+
+async function updateToAirport (x) {
+    console.log('target', x.target)
+    let icao = x.target.id.slice(5)
+    console.log('icao', icao)
+    let airportInfo = airportData.find((i) => i['icao_code'] === icao)
+    let fetchedData = await fetchMetar(icao)
+    useMetarData(fetchedData, airportInfo)
+}
+
+let airportsDisplayed;
+async function showAirports () {
+    let area = document.getElementById('showAirport')
+    await fetchAirportLocation()
+    let airportsToShow  = sortAirportByClosest().slice(0, 5)
+    airportsToShow = airportsToShow.filter((x) => x.distance < 10)
+    airportsToShow.forEach(x => {
+        let item = document.createElement('div')
+        item.innerText = x.name + ' as location'
+        item.className = 'air'
+        item.id = 'metar' + x.icao_code
+        item.addEventListener('click', (x) => {
+            updateToAirport(x)
+            x.target.style.color = 'grey'
+        })
+        area.appendChild(item)
+    })
+}

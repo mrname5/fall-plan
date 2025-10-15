@@ -162,3 +162,13 @@ span {
 #haho {
     display: none;
 }
+
+.air {
+    color: #007bff;
+}
+
+.air:hover {
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+}
