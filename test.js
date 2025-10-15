@@ -823,13 +823,13 @@ async function writeCurrentLocation () {
 
 function whenLocationChange (x) {
     console.log('loc change detected')
+    if (x === undefined) {
+        showAirports()
+    }
     if (latInfo.value !== '' && longInfo.value !== '') {
         fetchFromOpenMeteo(JSON.parse(latInfo.value), JSON.parse(longInfo.value))
         saveCurrentLocation()
 //         checkIfAllFieldsInputted()
-    }
-    if (x === undefined) {
-        showAirports()
     }
 }
 
