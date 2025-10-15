@@ -274,6 +274,7 @@ function updateLocation (x) {
 getLocationButton.onclick = function (e) {
     navigator.geolocation.getCurrentPosition((x) => {
         updateLocation(x)
+        showAirports()
     }, console.log)
 }
 
