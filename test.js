@@ -828,9 +828,9 @@ function whenLocationChange (x) {
         saveCurrentLocation()
 //         checkIfAllFieldsInputted()
     }
-//     if (x === undefined) {
-//         showAirports()
-//     }
+    if (x === undefined) {
+        showAirports()
+    }
 }
 
 function handleCoordsPasting (e) {
